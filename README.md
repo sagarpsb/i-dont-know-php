@@ -6,7 +6,7 @@ It's completely normal to feel like there's more to learn, even after working wi
    - **Advanced Syntax and Language Features**: If you feel shaky on the basics, go deeper into PHP's syntax, operators, loops, conditionals, functions, and classes.
      - [**Namespaces**](#namespaces)
      - [**Traits**](#traits)
-     - **Magic Methods (e.g., `__construct()`, `__get()`, `__set()`, `__call()`)**
+     - [**Magic Methods (e.g., `__construct()`, `__get()`, `__set()`, `__call()`)**](#magic-methods-in-php)
      - **Generators and Iterators**
      - **Anonymous Functions, Closures, and Lambdas**
      - **Error Handling with `try`, `catch`, and `finally`**
@@ -567,3 +567,248 @@ Here, `MyTrait` contains an abstract method `sayHello()`, which must be implemen
 ### Conclusion
 
 In summary, **PHP Traits** provide a powerful way to share methods between classes. They are especially useful for avoiding code duplication and overcoming PHP’s single inheritance model. However, they should be used wisely, as excessive use can lead to harder-to-maintain code. Keep traits focused on a single responsibility, and always resolve name conflicts between traits to ensure clean, understandable code.
+
+
+# Magic Methods in PHP
+
+In PHP, **magic methods** are special methods that start with two underscores (`__`) and allow developers to define custom behavior for certain built-in operations. These methods are not called directly by the developer but are automatically invoked by PHP under specific circumstances. Magic methods provide a powerful way to interact with the internals of objects and can be used to control various aspects of object behavior in an object-oriented way.
+
+### 1. **`__construct()` - Constructor**
+
+The `__construct()` method is called when an object is instantiated from a class. It is the **constructor** of the class, used for initializing object properties or performing any setup tasks.
+
+- **Purpose**: Initialize object properties and set up the object.
+- **When it's called**: Automatically called when a new instance of the class is created.
+
+#### Example:
+```php
+class Car {
+    public $color;
+
+    // Constructor method
+    public function __construct($color) {
+        $this->color = $color;  // Initialize the color property
+    }
+}
+
+$myCar = new Car('red');
+echo $myCar->color; // Output: red
+```
+
+In this example, the `__construct()` method is used to set the initial value of the `color` property when a new `Car` object is created.
+
+### 2. **`__destruct()` - Destructor**
+
+The `__destruct()` method is called when an object is destroyed (i.e., when it goes out of scope or is explicitly destroyed using `unset()`).
+
+- **Purpose**: Cleanup operations (e.g., closing database connections, releasing resources).
+- **When it's called**: Automatically when an object is destroyed or when the script finishes executing.
+
+#### Example:
+```php
+class Car {
+    public function __destruct() {
+        echo "Car object is being destroyed";
+    }
+}
+
+$myCar = new Car();
+// Output: Car object is being destroyed (when the script ends or the object is unset)
+```
+
+The destructor is useful for releasing resources like closing a file or database connection.
+
+### 3. **`__get()` - Getter Magic Method**
+
+The `__get()` method is triggered when you attempt to access a property that is not accessible in the object (e.g., when the property is private, protected, or doesn't exist).
+
+- **Purpose**: Define custom behavior when accessing a property.
+- **When it's called**: Automatically called when an inaccessible or non-existent property is accessed.
+
+#### Example:
+```php
+class Person {
+    private $name;
+
+    public function __construct($name) {
+        $this->name = $name;
+    }
+
+    public function __get($property) {
+        if ($property == 'name') {
+            return $this->name;
+        }
+        return null;
+    }
+}
+
+$person = new Person('John');
+echo $person->name;  // Output: John
+```
+
+In this example, `__get()` is used to define a custom getter for the `name` property.
+
+### 4. **`__set()` - Setter Magic Method**
+
+The `__set()` method is invoked when you try to set the value of a property that is not accessible (e.g., private, protected, or non-existent).
+
+- **Purpose**: Define custom behavior when setting a property.
+- **When it's called**: Automatically called when you try to set an inaccessible or non-existent property.
+
+#### Example:
+```php
+class Person {
+    private $name;
+
+    public function __set($property, $value) {
+        if ($property == 'name') {
+            $this->name = $value;
+        }
+    }
+}
+
+$person = new Person();
+$person->name = 'Alice';  // Using __set() to set the name
+echo $person->name;  // Output: Alice
+```
+
+In this example, `__set()` is used to define how the `name` property can be set, even if it’s private.
+
+### 5. **`__isset()` - Isset Magic Method**
+
+The `__isset()` method is triggered when you use the `isset()` or `empty()` functions on inaccessible properties.
+
+- **Purpose**: Define custom behavior for checking if a property is set or not.
+- **When it's called**: Automatically called when `isset()` or `empty()` is called on an inaccessible or non-existent property.
+
+#### Example:
+```php
+class Person {
+    private $name;
+
+    public function __isset($property) {
+        return $property == 'name' && isset($this->name);
+    }
+}
+
+$person = new Person();
+var_dump(isset($person->name));  // Output: bool(false)
+```
+
+Here, `__isset()` controls the result of calling `isset()` on the `name` property.
+
+### 6. **`__unset()` - Unset Magic Method**
+
+The `__unset()` method is invoked when you try to unset an inaccessible or non-existent property using `unset()`.
+
+- **Purpose**: Define custom behavior when unsetting a property.
+- **When it's called**: Automatically called when `unset()` is called on an inaccessible or non-existent property.
+
+#### Example:
+```php
+class Person {
+    private $name;
+
+    public function __unset($property) {
+        if ($property == 'name') {
+            $this->name = null;
+        }
+    }
+}
+
+$person = new Person();
+unset($person->name);  // Uses __unset() method
+```
+
+In this case, the `__unset()` method is invoked when attempting to unset the `name` property.
+
+### 7. **`__call()` - Method Call Magic Method**
+
+The `__call()` method is called when you try to call a method that doesn't exist or is not accessible in the object.
+
+- **Purpose**: Define custom behavior for non-existent or inaccessible methods.
+- **When it's called**: Automatically called when a method is invoked on the object that doesn't exist.
+
+#### Example:
+```php
+class Person {
+    public function __call($method, $arguments) {
+        echo "Calling method '$method' with arguments: " . implode(', ', $arguments);
+    }
+}
+
+$person = new Person();
+$person->sayHello('John', 'Doe');  // Output: Calling method 'sayHello' with arguments: John, Doe
+```
+
+Here, `__call()` is invoked when the non-existent method `sayHello()` is called on the `Person` object.
+
+### 8. **`__callStatic()` - Static Method Call Magic Method**
+
+The `__callStatic()` method is similar to `__call()`, but it is used for **static method calls**. It’s invoked when a static method is called on a class that does not exist or is not accessible.
+
+- **Purpose**: Define custom behavior for non-existent or inaccessible static methods.
+- **When it's called**: Automatically called when a non-existent static method is called.
+
+#### Example:
+```php
+class Person {
+    public static function __callStatic($method, $arguments) {
+        echo "Calling static method '$method' with arguments: " . implode(', ', $arguments);
+    }
+}
+
+Person::sayHello('John', 'Doe');  // Output: Calling static method 'sayHello' with arguments: John, Doe
+```
+
+Here, `__callStatic()` is invoked when the non-existent static method `sayHello()` is called on the `Person` class.
+
+### 9. **`__toString()` - String Representation**
+
+The `__toString()` method is called when an object is treated as a string (e.g., echoed or printed). It should return a string that represents the object.
+
+- **Purpose**: Customize how an object is converted to a string.
+- **When it's called**: Automatically called when the object is used in a string context (e.g., echo, print).
+
+#### Example:
+```php
+class Person {
+    private $name;
+
+    public function __construct($name) {
+        $this->name = $name;
+    }
+
+    public function __toString() {
+        return "Person's name is: " . $this->name;
+    }
+}
+
+$person = new Person('John');
+echo $person;  // Output: Person's name is: John
+```
+
+The `__toString()` method allows you to define how an object should be represented as a string.
+
+### 10. **`__invoke()` - Object Invoking Magic Method**
+
+The `__invoke()` method is called when an object is used as a function. This is useful when you want an object to act like a callable function.
+
+- **Purpose**: Make an object behave like a function.
+- **When it's called**: Automatically called when an object is used in a function call context.
+
+#### Example:
+```php
+class Person {
+    public function __invoke($greeting) {
+        return "$greeting, I am a person.";
+    }
+}
+
+$person = new Person();
+echo $person('Hello');  // Output: Hello, I am a person.
+```
+
+### Conclusion
+
+Magic methods in PHP are powerful tools for controlling how objects behave in different contexts. They allow for customization of object construction, property access, method calls, and more. However, while magic methods provide flexibility, they can also make code more complex and harder to debug. It's essential to use them judiciously and with clear intentions to ensure maintainable and understandable code.
