@@ -1051,7 +1051,7 @@ By mastering these concepts, you can write more efficient, readable
 
 [Go to top](#i-dont-know-php)
 
-#Anonymous Function, Closures And Lambdas
+# Anonymous Function, Closures And Lambdas
 
 Anonymous functions, closures, and lambdas are foundational concepts in modern PHP, enabling more dynamic and expressive programming. Here's a detailed explanation of each, how they relate, and what you should know.
 
